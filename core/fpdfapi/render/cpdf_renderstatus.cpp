@@ -455,6 +455,9 @@ bool CPDF_RenderStatus::ProcessPath(CPDF_PathObject* path_obj,
                                     const CFX_Matrix& mtObj2Device) {
   CFX_FillRenderOptions::FillType fill_type = path_obj->filltype();
   bool stroke = path_obj->stroke();
+  // EmbedPDF(bug-fix): upstream drew a pattern stroke before the path's solid
+  // fill, so with B and B* the fill covered the stroke's inner half. The
+  // pattern stroke is held back here and drawn after the fill.
   const CPDF_Color* pattern_stroke =
       stroke && path_obj->color_state().GetStrokeColor()->IsPattern()
           ? path_obj->color_state().GetStrokeColor()
@@ -489,6 +492,9 @@ bool CPDF_RenderStatus::ProcessPath(CPDF_PathObject* path_obj,
     return true;
   }
 
+  // EmbedPDF(bug-fix): the held-back pattern stroke goes on top of the fill.
+  // When DrawPath() fails, the caller redraws the whole object, stroke
+  // included, so the stroke is skipped here.
   const bool result = device_->DrawPath(
       *path_obj->path().GetObject(), &path_matrix,
       path_obj->graph_state().GetObject(), fill_argb, stroke_argb,

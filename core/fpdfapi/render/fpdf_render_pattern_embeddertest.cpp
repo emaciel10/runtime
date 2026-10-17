@@ -26,15 +26,15 @@ TEST_F(FPDFRenderPatternEmbedderTest, ShadingStrokePaintsAfterSolidFill) {
       const int size = 100 * scale;
       const int stride = size * 4;
       std::vector<uint8_t> pixels(size * stride);
-      ScopedFPDFBitmap bitmap(FPDFBitmap_CreateEx(
-          size, size, FPDFBitmap_BGRA, pixels.data(), stride));
+      ScopedFPDFBitmap bitmap(FPDFBitmap_CreateEx(size, size, FPDFBitmap_BGRA,
+                                                  pixels.data(), stride));
       ASSERT_TRUE(bitmap);
       ASSERT_TRUE(FPDFBitmap_FillRect(bitmap.get(), 0, 0, size, size,
-                                     /*color=*/0xFFFFFFFF));
+                                      /*color=*/0xFFFFFFFF));
       FPDF_RenderPageBitmap(bitmap.get(), page.get(), 0, 0, size, size,
-                           /*rotate=*/0, /*flags=*/0);
+                            /*rotate=*/0, /*flags=*/0);
 
-      // Both halves of the 10-point stroke must remain visible for B, B*, and S.
+      // Both halves of the 10-point stroke stay visible for B, B* and S.
       const int row = 50 * scale * stride;
       EXPECT_LT(pixels[row + 17 * scale * 4 + 1], 20);
       EXPECT_LT(pixels[row + 23 * scale * 4 + 1], 20);
